@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 340px;
+      padding: 18px;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, #0a0a1a 0%, #12122e 100%);
+      color: #e0e0ff;
+    }
+    h1 {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 14px;
+      color: #00d4ff;
+      text-shadow: 0 0 12px rgba(0,212,255,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .section { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 11px;
+      color: #8899aa;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+    }
+    .speed-display {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 800;
+      color: #00ff88;
+      margin: 6px 0 10px;
+      text-shadow: 0 0 18px rgba(0,255,136,0.25);
+      font-variant-numeric: tabular-nums;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      background: #1a1a3e;
+      border-radius: 4px;
+      outline: none;
+      margin-bottom: 10px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #00d4ff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(0,212,255,0.6);
+      border: 2px solid #0a0a1a;
+    }
+    .presets {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      flex: 1;
+      min-width: 44px;
+      padding: 7px 0;
+      border: 1px solid #334466;
+      background: #13132e;
+      color: #aaccff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .preset-btn:hover, .preset-btn.active {
+      border-color: #00d4ff;
+      color: #00d4ff;
+      background: rgba(0,212,255,0.08);
+    }
+    .techniques {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 10px;
+      background: #13132e;
+      border-radius: 8px;
+      border: 1px solid #223355;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 12px;
+      user-select: none;
+    }
+    .tech-item:hover { border-color: #334466; }
+    .tech-item.active {
+      border-color: #00ff88;
+      background: rgba(0,255,136,0.07);
+    }
+    .tech-item input { display: none; }
+    .checkmark {
+      width: 16px; height: 16px;
+      border: 2px solid #445577;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .tech-item.active .checkmark {
+      background: #00ff88;
+      border-color: #00ff88;
+    }
+    .checkmark::after {
+      content: "✓";
+      color: #0a0a1a;
+      font-size: 11px;
+      font-weight: 900;
+      opacity: 0;
+    }
+    .tech-item.active .checkmark::after { opacity: 1; }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .btn {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .btn-apply {
+      background: linear-gradient(135deg, #00d4ff, #0088cc);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0,212,255,0.25);
+    }
+    .btn-apply:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,212,255,0.4);
+    }
+    .btn-apply:active { transform: translateY(0); }
+    .btn-reset {
+      background: #1f0f0f;
+      color: #ff7777;
+      border: 1px solid #552222;
+    }
+    .btn-reset:hover {
+      background: #2a1212;
+      border-color: #ff4444;
+      color: #ffaaaa;
+    }
+    .status {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 12px;
+      padding: 8px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-weight: 600;
+      min-height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .status.show { opacity: 1; }
+    .status.success { background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.2); }
+    .status.error { background: rgba(255,80,80,0.1); color: #ff8888; border: 1px solid rgba(255,80,80,0.2); }
+    .info {
+      font-size: 10px;
+      color: #556677;
+      text-align: center;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(0,212,255,0.12);
+      color: #00d4ff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid rgba(0,212,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ Speed Hack <span class="badge">MV3</span></h1>
+
+  <div class="section">
+    <label>Multiplicador de Velocidade</label>
+    <div class="speed-display" id="speedValue">1.0x</div>
+    <input type="range" id="speedRange" min="0.1" max="10" step="0.1" value="1" />
+    <div class="presets">
+      <button class="preset-btn" data-speed="0.5">0.5x</button>
+      <button class="preset-btn" data-speed="1">1x</button>
+      <button class="preset-btn" data-speed="2">2x</button>
+      <button class="preset-btn" data-speed="5">5x</button>
+      <button class="preset-btn" data-speed="10">10x</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Técnicas de Injeção (world MAIN)</label>
+    <div class="techniques" id="techniques">
+      <div class="tech-item active" data-tech="setTimeout">
+        <div class="checkmark"></div>
+        <input type="checkbox" checked />
+        <span>setTimeout</span>
+      </div>
+      <div class="tech-item active" data-tech="setInterval">
+        <div class="checkmark"></div>
+        <input type="checkbox" checked />
+        <span>setInterval</span>
+      </div>
+      <div class="tech-item active" data-tech="dateNow">
+        <div class="checkmark"></div>
+        <input type="checkbox" checked />
+        <span>Date.now</span>
+      </div>
+      <div class="tech-item active" data-tech="performanceNow">
+        <div class="checkmark"></div>
+        <input type="checkbox" checked />
+        <span>performance.now</span>
+      </div>
+      <div class="tech-item active" data-tech="requestAnimationFrame">
+        <div class="checkmark"></div>
+        <input type="checkbox" checked />
+        <span>requestAnimationFrame</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-apply" id="applyBtn">Aplicar Speed</button>
+    <button class="btn btn-reset" id="resetBtn">Restaurar</button>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div class="info">O código é injetado diretamente no contexto de execução da página (world MAIN) via chrome.scripting.executeScript.</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
