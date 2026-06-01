@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const techItems = document.querySelectorAll(".tech-item");
   const presetBtns = document.querySelectorAll(".preset-btn");
 
+  let statusTimer = null;
+
   // Carrega configuração salva
   chrome.storage.local.get(["speed", "techniques", "enabled"], (data) => {
     const speed = data.speed ? parseFloat(data.speed) : 1;
@@ -55,9 +57,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function showStatus(msg, type) {
+    if (statusTimer) clearTimeout(statusTimer);
     statusEl.textContent = msg;
     statusEl.className = "status show " + type;
-    setTimeout(() => { statusEl.classList.remove("show"); }, 3000);
+    statusTimer = setTimeout(() => { statusEl.classList.remove("show"); }, 4000);
+  }
+
+  function setLoading(btn, isLoading) {
+    btn.disabled = isLoading;
+    btn.classList.toggle("loading", isLoading);
   }
 
   applyBtn.addEventListener("click", () => {
@@ -71,33 +79,48 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    chrome.storage.local.set({ speed, techniques, enabled: true });
+    setLoading(applyBtn, true);
+    showStatus("Aplicando speed hack...", "info");
 
-    chrome.runtime.sendMessage(
-      { action: "apply", speed, techniques },
-      (response) => {
+    chrome.storage.local.set({ speed, techniques, enabled: true }, () => {
+      chrome.runtime.sendMessage(
+        { action: "apply", speed, techniques },
+        (response) => {
+          setLoading(applyBtn, false);
+          if (chrome.runtime.lastError) {
+            showStatus("Erro: " + chrome.runtime.lastError.message, "error");
+            return;
+          }
+          if (response && response.success) {
+            showStatus("Speed Hack ativado: " + speed.toFixed(1) + "x", "success");
+          } else {
+            showStatus("Erro: " + (response?.error || "desconhecido"), "error");
+          }
+        }
+      );
+    });
+  });
+
+  resetBtn.addEventListener("click", () => {
+    setLoading(resetBtn, true);
+    showStatus("Restaurando página...", "info");
+
+    chrome.storage.local.set({ enabled: false }, () => {
+      chrome.runtime.sendMessage({ action: "reset" }, (response) => {
+        setLoading(resetBtn, false);
         if (chrome.runtime.lastError) {
           showStatus("Erro: " + chrome.runtime.lastError.message, "error");
           return;
         }
         if (response && response.success) {
-          showStatus(`Speed Hack ativado: ${speed.toFixed(1)}x`, "success");
+          showStatus("Página restaurada. Recarregando...", "success");
+          speedRange.value = 1;
+          speedValue.textContent = "1.0x";
+          updatePresetActive(1);
         } else {
-          showStatus("Erro ao aplicar: " + (response?.error || "desconhecido"), "error");
+          showStatus("Erro: " + (response?.error || "desconhecido"), "error");
         }
-      }
-    );
-  });
-
-  resetBtn.addEventListener("click", () => {
-    chrome.storage.local.set({ enabled: false });
-    chrome.runtime.sendMessage({ action: "reset" }, (response) => {
-      if (response && response.success) {
-        showStatus("Página restaurada. Recarregando...", "success");
-        speedRange.value = 1;
-        speedValue.textContent = "1.0x";
-        updatePresetActive(1);
-      }
+      });
     });
   });
 });

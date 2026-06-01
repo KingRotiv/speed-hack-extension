@@ -5,7 +5,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 340px;
+      width: fit-content;
       padding: 18px;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: linear-gradient(180deg, #0a0a1a 0%, #12122e 100%);
@@ -127,6 +127,18 @@
       opacity: 0;
     }
     .tech-item.active .checkmark::after { opacity: 1; }
+    .tech-item .tag {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-left: auto;
+      font-weight: 700;
+    }
+    .tag.advanced {
+      background: rgba(255,180,0,0.15);
+      color: #ffcc44;
+      border: 1px solid rgba(255,180,0,0.3);
+    }
     .actions {
       display: flex;
       gap: 10px;
@@ -142,23 +154,31 @@
       cursor: pointer;
       transition: all 0.2s;
       letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
     }
     .btn-apply {
       background: linear-gradient(135deg, #00d4ff, #0088cc);
       color: #fff;
       box-shadow: 0 4px 14px rgba(0,212,255,0.25);
     }
-    .btn-apply:hover {
+    .btn-apply:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0,212,255,0.4);
     }
-    .btn-apply:active { transform: translateY(0); }
     .btn-reset {
       background: #1f0f0f;
       color: #ff7777;
       border: 1px solid #552222;
     }
-    .btn-reset:hover {
+    .btn-reset:hover:not(:disabled) {
       background: #2a1212;
       border-color: #ff4444;
       color: #ffaaaa;
@@ -169,17 +189,18 @@
       margin-top: 12px;
       padding: 8px;
       border-radius: 8px;
-      opacity: 0;
-      transition: opacity 0.3s;
       font-weight: 600;
       min-height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
     }
     .status.show { opacity: 1; }
     .status.success { background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.2); }
     .status.error { background: rgba(255,80,80,0.1); color: #ff8888; border: 1px solid rgba(255,80,80,0.2); }
+    .status.info { background: rgba(0,212,255,0.1); color: #00d4ff; border: 1px solid rgba(0,212,255,0.2); }
     .info {
       font-size: 10px;
       color: #556677;
@@ -196,6 +217,28 @@
       font-size: 10px;
       font-weight: 700;
       border: 1px solid rgba(0,212,255,0.2);
+    }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+    .btn.loading .spinner { display: inline-block; }
+    .btn.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .warning {
+      font-size: 10px;
+      color: #ffaa55;
+      background: rgba(255,170,85,0.08);
+      border: 1px solid rgba(255,170,85,0.2);
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin-top: 8px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -216,7 +259,7 @@
   </div>
 
   <div class="section">
-    <label>Técnicas de Injeção (world MAIN)</label>
+    <label>Técnicas de Injeção</label>
     <div class="techniques" id="techniques">
       <div class="tech-item active" data-tech="setTimeout">
         <div class="checkmark"></div>
@@ -243,16 +286,52 @@
         <input type="checkbox" checked />
         <span>requestAnimationFrame</span>
       </div>
+      <div class="tech-item" data-tech="worker">
+        <div class="checkmark"></div>
+        <input type="checkbox" />
+        <span>Web Workers</span>
+        <span class="tag advanced">AVANÇADO</span>
+      </div>
+      <div class="tech-item" data-tech="audioContext">
+        <div class="checkmark"></div>
+        <input type="checkbox" />
+        <span>AudioContext</span>
+        <span class="tag advanced">AVANÇADO</span>
+      </div>
+      <div class="tech-item" data-tech="messageChannel">
+        <div class="checkmark"></div>
+        <input type="checkbox" />
+        <span>MessageChannel</span>
+        <span class="tag advanced">AVANÇADO</span>
+      </div>
+      <div class="tech-item" data-tech="consoleTime">
+        <div class="checkmark"></div>
+        <input type="checkbox" />
+        <span>console.time</span>
+      </div>
+      <div class="tech-item" data-tech="webSocket">
+        <div class="checkmark"></div>
+        <input type="checkbox" />
+        <span>WebSocket</span>
+        <span class="tag advanced">ONLINE</span>
+      </div>
     </div>
+    <div class="warning">⚠️ WebSocket pode quebrar jogos multiplayer online. Use com cuidado.</div>
   </div>
 
   <div class="actions">
-    <button class="btn btn-apply" id="applyBtn">Aplicar Speed</button>
-    <button class="btn btn-reset" id="resetBtn">Restaurar</button>
+    <button class="btn btn-apply" id="applyBtn">
+      <div class="spinner"></div>
+      <span class="btn-text">Aplicar Speed</span>
+    </button>
+    <button class="btn btn-reset" id="resetBtn">
+      <div class="spinner"></div>
+      <span class="btn-text">Restaurar</span>
+    </button>
   </div>
 
   <div class="status" id="status"></div>
-  <div class="info">O código é injetado diretamente no contexto de execução da página (world MAIN) via chrome.scripting.executeScript.</div>
+  <div class="info">Injeção automática no document_start via chrome.webNavigation. Técnicas avançadas cobrem Workers e AudioContext.</div>
 
   <script src="popup.js"></script>
 </body>
